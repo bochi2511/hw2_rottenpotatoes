@@ -10,13 +10,17 @@ class MoviesController < ApplicationController
     #raise params.inspect
     sortby = params[:sortby]
     #raise sortby.inspect
+    @title_class = ''
+    @release_class = ''
     case sortby
     when 'title'
       @movies = Movie.all(:order => "title")
       @title_class = 'hilite'
+    when 'release'
+      @movies = Movie.all(:order => "release_date")
+      @release_class = 'hilite'
     else
       @movies = Movie.all
-      @title_class = ''
     end
   end
 
