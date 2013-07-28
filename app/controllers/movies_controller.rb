@@ -7,20 +7,28 @@ class MoviesController < ApplicationController
   end
 
   def index
+    #debugger
     #raise params.inspect
     sortby = params[:sortby]
     #raise sortby.inspect
     @title_class = ''
     @release_class = ''
+    @all_ratings = Movie.get_all_ratings
+    @ratings_selected = Hash.new
+    if !params[:ratings] then
+      @all_ratings.each { |rating| @ratings_selected[rating] = "1" }
+    else
+      @ratings_selected = params[:ratings]
+    end
     case sortby
     when 'title'
-      @movies = Movie.all(:order => "title")
+      @movies = Movie.all(:order => "title", :conditions => {:rating => @ratings_selected.keys})
       @title_class = 'hilite'
     when 'release'
-      @movies = Movie.all(:order => "release_date")
+      @movies = Movie.all(:order => "release_date", :conditions => {:rating => @ratings_selected.keys})
       @release_class = 'hilite'
     else
-      @movies = Movie.all
+      @movies = Movie.all(:conditions => {:rating => @ratings_selected.keys})
     end
   end
 
