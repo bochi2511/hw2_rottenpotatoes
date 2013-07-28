@@ -9,17 +9,40 @@ class MoviesController < ApplicationController
   def index
     #debugger
     #raise params.inspect
-    sortby = params[:sortby]
-    #raise sortby.inspect
-    @title_class = ''
-    @release_class = ''
     @all_ratings = Movie.get_all_ratings
     @ratings_selected = Hash.new
-    if !params[:ratings] then
-      @all_ratings.each { |rating| @ratings_selected[rating] = "1" }
-    else
+    sortby = ''
+    if ((!params[:sortby] && params[:ratings] && !session[:sortby]) || (params[:sortby] && params[:ratings])) then
       @ratings_selected = params[:ratings]
+      session[:ratings] = params[:ratings]
+      if params[:sortby] then
+        sortby = params[:sortby]
+        session[:sortby] = params[:sortby]
+      end
+    else
+      if !params[:sortby] then
+        if session[:sortby] then
+          sortby = session[:sortby]
+        end
+      else
+        sortby = params[:sortby]
+        session[:sortby] = params[:sortby]
+      end
+      if !params[:ratings] then
+        if !session[:ratings] then
+          @all_ratings.each { |rating| @ratings_selected[rating] = "1" }
+        else
+          @ratings_selected = session[:ratings]
+        end
+      else
+        @ratings_selected = params[:ratings]
+        session[:ratings] = params[:ratings]
+      end
+      flash.keep
+      redirect_to movies_path(:sortby => sortby, :ratings => @ratings_selected)
     end
+    @title_class = ''
+    @release_class = ''
     case sortby
     when 'title'
       @movies = Movie.all(:order => "title", :conditions => {:rating => @ratings_selected.keys})
